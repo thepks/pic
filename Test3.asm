@@ -8,13 +8,20 @@ counter EQU 0x71
 lastread EQU 0x72
 speed1 EQU 0x73
 speed2 EQU 0x74
+Save_W EQU 0x75
+Save_Status EQU 0x76
  
 	ORG 0x00
         GOTO setup
 	
 	ORG 0x04
 ; Interrupt handler
+; first store the items that will be impacted by the Int
+        MOVWF   Save_W
+        SWAPF   STATUS, W
+        MOVWF   Save_Status
 	MOVF speed1,w
+; now the processing
 	IORLW 0x00
 	BTFSC STATUS,Z
 	GOTO temp_part
@@ -36,6 +43,11 @@ doneit: NOP
 	BCF INTCON, INTF
 	BCF INTCON, T0IF
 	BANKSEL PORTB
+; Finally reset the items before returning
+	SWAPF   Save_Status, W
+	MOVWF   STATUS
+	SWAPF   Save_W, F
+	SWAPF   Save_W, W
 	RETFIE
 	
 setup:
