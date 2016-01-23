@@ -81,7 +81,5 @@ begin: nop
 	MOVWF lastread
 	goto begin
 	
-
-
     end	
 
