@@ -10,6 +10,7 @@ speed1 EQU 0x73
 speed2 EQU 0x74
 Save_W EQU 0x75
 Save_Status EQU 0x76
+Count EQU 0x77
  
 	ORG 0x00
         GOTO setup
@@ -126,5 +127,25 @@ start_timer_2:
 	MOVWF speed2
 	RETURN
 
+; Delay routines
+;-----------------------------------
+
+Delay50us   MOVLW   d'12'
+            GOTO    Cntdwn
+
+Delay1ms    MOVLW   d'246'
+            GOTO    Cntdwn
+
+Delay100ms  MOVLW   d'99'
+            MOVWF   Count
+loop100ms   CALL    Delay1ms
+            DECFSZ  Count,  F
+            GOTO    loop100ms
+            RETURN
+
+Cntdwn      ADDLW   -1              ;decrement W
+            BTFSS   STATUS, Z       ;Zero flag set?
+            GOTO    Cntdwn          ;No, keep looping
+            RETURN                  ;Yes, timeout done
 
    	END	
