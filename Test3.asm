@@ -4,8 +4,8 @@
 	__CONFIG h'3f58' 
 
 	org 0x20
-	counter EQU 0x71
-	lastread EQU 0x72
+counter EQU 0x71
+lastread EQU 0x72
  
 	org 0x00
         goto main
