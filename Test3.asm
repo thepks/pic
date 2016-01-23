@@ -6,11 +6,23 @@
 	org 0x20
 counter EQU 0x71
 lastread EQU 0x72
+speed1 EQU 0x73
+speed2 EQU 0x74
  
 	org 0x00
-        goto main
+        goto setup
 	
 	org 0x04
+; Interrupt handler
+	MOVF speed1,w
+	IORLW 0x00
+	BTFSC STATUS,Z
+	GOTO increment_speed_2
+	INCF speed1,1
+	GOTO temp_part
+increment_speed_2: NOP
+	INCF speed2,1
+temp_part: NOP
 	RLF counter,1
 	btfss counter,6
 	goto skipop
@@ -36,7 +48,7 @@ doneit: nop
 	BANKSEL PORTB
 	retfie
 	
-main:
+setup:
 	BANKSEL CMCON
 	movlw 0x07					;	This will turn the comparators OFF.
 	movwf CMCON
@@ -71,13 +83,45 @@ main:
 	BANKSEL PORTB
   	MOVLW 0x01
 	MOVWF counter
+	MOVLW 0x00
+	MOVWF lastread
+	MOVWF speed1
+	MOVWF speed2
 
-setup:		
 
 begin: nop
+	MOVF speed1,w
+	IORWF speed2, w
+	BTFSS STATUS,Z
+	CALL reset_speed_timers
 	movf PORTA,w
-	MOVWF lastread
+	IORLW 0x00
+	BTFSS STATUS,Z
+	CALL start_timer
+	IORWF lastread,1
 	goto begin
 	
-   	end	
+reset_speed_timers:
+	NOP
+	MOVLW 0x00
+	ANDWF speed1,1
+	ANDWF speed2,1
+	RETURN
 
+start_timer:
+	NOP
+	MOVF speed1,w
+	IORLW 0x00
+	BTFSS STATUS,Z
+	goto start_timer_2
+	MOVLW 0x01
+	MOVWF speed1
+	RETURN
+start_timer_2:
+	NOP
+	MOVWF 0x01
+	MOVWF speed2
+	RETURN
+
+
+   	end	
