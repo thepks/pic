@@ -3,18 +3,22 @@
 
 	__CONFIG h'3f58' 
 
-	org 0x20
+	ORG 0x20
 counter EQU 0x71
 lastread EQU 0x72
 speed1 EQU 0x73
 speed2 EQU 0x74
  
-	org 0x00
-        goto setup
+	ORG 0x00
+        GOTO setup
 	
-	org 0x04
+	ORG 0x04
 ; Interrupt handler
 	MOVF speed1,w
+	IORLW 0x00
+	BTFSC STATUS,Z
+	GOTO temp_part
+	MOVF speed2,w
 	IORLW 0x00
 	BTFSC STATUS,Z
 	GOTO increment_speed_2
@@ -23,50 +27,36 @@ speed2 EQU 0x74
 increment_speed_2: NOP
 	INCF speed2,1
 temp_part: NOP
-	RLF counter,1
-	btfss counter,6
-	goto skipop
-	movlw 0x01
-	movwf counter
-skipop: nop
 	BANKSEL PORTB
-	movf lastread,1
-	btfsc STATUS,Z
-	goto pattern
-	movf counter,w
-	andwf lastread,w 
-	movwf PORTB
-	goto doneit
-pattern: nop
-	movf counter,w
-	andlw 0x3f
-	movwf PORTB
-doneit: nop
+	MOVLW 0x3f
+	ANDWF lastread,w 
+	MOVWF PORTB
+doneit: NOP
 	BANKSEL INTCON
-	bcf INTCON, INTF
-	bcf INTCON, T0IF
+	BCF INTCON, INTF
+	BCF INTCON, T0IF
 	BANKSEL PORTB
-	retfie
+	RETFIE
 	
 setup:
 	BANKSEL CMCON
-	movlw 0x07					;	This will turn the comparators OFF.
-	movwf CMCON
+	MOVLW 0x07					;	This will turn the comparators OFF.
+	MOVWF CMCON
 
 	BANKSEL TRISB
-	movlw 0x00
-	movwf TRISB	;	We can set each bit individualy. Each port having 8-bits or 8 pins.
-	movlw 0x0F
-	movwf TRISA
+	MOVLW 0x00
+	MOVWF TRISB	;	We can set each bit individualy. Each port having 8-bits or 8 pins.
+	MOVLW 0x0F
+	MOVWF TRISA
 	  
  	BANKSEL TMR0
-	movlw 0x00
-	movwf TMR0
+	MOVLW 0x00
+	MOVWF TMR0
    
 	BANKSEL OPTION_REG
 ;     BSF OPTION_REG, INTEDG   
-	movlw 0x86 ;b'10000110'
-	movwf OPTION_REG 
+	MOVLW 0x86 ;b'10000110'
+	MOVWF OPTION_REG 
 ;     BCF OPTION_REG, T0CS
 ;     BCF OPTION_REG, PSA
 	BANKSEL INTCON
@@ -78,7 +68,7 @@ setup:
 ;     BCF INTCON, RBIE
 ;     BCF INTCON, T0IF
 	MOVLW 0xa0
-	movwf INTCON
+	MOVWF INTCON
 
 	BANKSEL PORTB
   	MOVLW 0x01
@@ -89,17 +79,18 @@ setup:
 	MOVWF speed2
 
 
-begin: nop
+begin: NOP
 	MOVF speed1,w
 	IORWF speed2, w
 	BTFSS STATUS,Z
 	CALL reset_speed_timers
-	movf PORTA,w
+	MOVF PORTA,w
 	IORLW 0x00
 	BTFSS STATUS,Z
 	CALL start_timer
+	MOVF PORTA,w
 	IORWF lastread,1
-	goto begin
+	GOTO begin
 	
 reset_speed_timers:
 	NOP
@@ -113,7 +104,7 @@ start_timer:
 	MOVF speed1,w
 	IORLW 0x00
 	BTFSS STATUS,Z
-	goto start_timer_2
+	GOTO start_timer_2
 	MOVLW 0x01
 	MOVWF speed1
 	RETURN
@@ -124,4 +115,4 @@ start_timer_2:
 	RETURN
 
 
-   	end	
+   	END	
