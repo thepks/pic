@@ -2,7 +2,7 @@
     include <p16f628.inc>		;	make sure you change this line and the previous line to read p16f628a
 
 
-    __CONFIG h'3f58' ;_CP_OFF & _WDTE_OFF & _BODEN_ON & _PWRTE_OFF & _ER_OSC_CLKOUT & _MCLRE_OFF & _LVP_OFF & _FOSC_INTOSCCLK							
+    __CONFIG h'3f58' 
 
 ;    org 0x20
     counter EQU 0x71
@@ -74,8 +74,7 @@ main:
     MOVLW 0x01
     MOVWF counter
 
-setup:							;	I always have a title labeled 'setup' this is where we set everything up
-								;	i.e. our variables and flags etc.. so they are ready for the main program
+setup:		
 
 begin: nop
 	movf PORTA,w
@@ -84,6 +83,5 @@ begin: nop
 	
 
 
-    end							;	We always need to have end at the end, even if we don't want the program
-								;	to actually end, it still must be here!
+    end	
 
